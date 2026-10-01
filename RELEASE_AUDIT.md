@@ -14,7 +14,7 @@ The public GitHub Actions workflow runs on Python **3.10, 3.11, and 3.12** and r
 
 ## Integration coverage
 
-Synthetic AnnData CLI integration verifies T2 slimming, metadata removal, float32 casting, spatial-column trimming, and semantic fingerprint preservation.
+Synthetic AnnData CLI integration verifies T2 slimming, metadata removal, float32 casting, spatial-column trimming, and semantic fingerprint preservation. Additional regression tests cover sparse Task 1 input and refusal to overwrite the source file in place.
 
 All repository fixtures are synthetic or generated during tests. No restricted or withheld Virtual Embryo Challenge data is bundled.
 
