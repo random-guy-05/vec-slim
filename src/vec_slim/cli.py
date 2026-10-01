@@ -28,6 +28,10 @@ def main(argv: list[str] | None = None) -> int:
         else None
     )
 
+    if plan.keep_spatial and spatial is None:
+        print('ERROR: T2/T3 input is missing obsm["spatial_3D"]')
+        return 2
+
     before_fingerprint = semantic_fingerprint(
         source.X,
         source.var_names,
@@ -44,8 +48,6 @@ def main(argv: list[str] | None = None) -> int:
         var=pd.DataFrame(index=source.var_names.astype(str)),
     )
     if plan.keep_spatial:
-        if spatial is None:
-            raise SystemExit('ERROR: T2/T3 input is missing obsm["spatial_3D"]')
         output.obsm["spatial_3D"] = np.asarray(
             spatial,
             dtype=np.float32,
