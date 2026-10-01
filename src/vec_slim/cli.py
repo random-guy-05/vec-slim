@@ -20,6 +20,10 @@ def main(argv: list[str] | None = None) -> int:
 
     import anndata as ad
 
+    if args.input.resolve() == args.output.resolve():
+        print("ERROR: input and output must be different files")
+        return 2
+
     source = ad.read_h5ad(args.input)
     plan = plan_for_task(args.task)
     spatial = (
