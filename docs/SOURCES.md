@@ -1,6 +1,6 @@
 # VEC source snapshot
 
-Verified **2026-09-30**. The official Challenge website is authoritative and may change.
+Verified **2026-10-01**. The official Challenge website is authoritative and may change.
 
 - Data and board contracts: https://virtualembryo.ai/challenge/data
 - Submission contract and metrics: https://virtualembryo.ai/challenge/evaluation
