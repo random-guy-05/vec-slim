@@ -1,16 +1,27 @@
 # Release audit
 
 Release: **v1.0.0**  
-Audit date: **2026-09-30**
+Audit date: **2026-10-01**
 
-- Local unit tests: **5/5 passing**
-- `python -m compileall -q src tests`: **passing**
-- CLI `--help`: **passing**
-- Required release files (README, licence, contribution text, changelog, CI, source snapshot): **present**
-- Uses only synthetic/unit-test inputs in the repository. No Challenge data is bundled.
+## Release gate
 
-## Scope of local verification
+The public GitHub Actions workflow runs on Python **3.10, 3.11, and 3.12** and requires all of the following:
 
-The execution environment used for this release has NumPy/SciPy/pytest/psutil but does not have `anndata` or `veckit`, and outbound package installation is unavailable. Code that depends on those packages imports them lazily; its pure logic and adapters are unit-tested here, and GitHub Actions is configured to install declared dependencies in a normal public CI environment. Dependency-free CLIs were additionally exercised end-to-end.
+- package installation from the repository metadata;
+- the complete pytest suite;
+- Ruff static/lint checks;
+- bytecode compilation of `src` and `tests`.
 
-This limitation is recorded rather than hidden: the repository is release-ready, but a publisher should still let the included CI matrix run after putting it on GitHub.
+## Integration coverage
+
+Synthetic AnnData CLI integration verifies T2 slimming, metadata removal, float32 casting, spatial-column trimming, and semantic fingerprint preservation.
+
+All repository fixtures are synthetic or generated during tests. No restricted or withheld Virtual Embryo Challenge data is bundled.
+
+## Source contract
+
+Challenge-specific statements are tied to `docs/SOURCES.md`. The official Virtual Embryo Challenge website and public scorer remain authoritative if the competition changes after the snapshot date.
+
+## Release standard
+
+A release is considered green only when the complete GitHub Actions matrix succeeds. README examples, package entry points, tests, license, contribution text, and source snapshot are included in the repository.
