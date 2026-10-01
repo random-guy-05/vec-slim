@@ -72,3 +72,62 @@ def test_t2_missing_spatial_fails(tmp_path):
     )
     assert result.returncode != 0
     assert "missing" in (result.stdout + result.stderr).lower()
+
+
+
+def test_t1_sparse_input_stays_sparse_and_drops_spatial_baggage(tmp_path):
+    from scipy import sparse
+
+    source_path = tmp_path / "source_t1.h5ad"
+    output_path = tmp_path / "slim_t1.h5ad"
+    rng = np.random.default_rng(10)
+    matrix = sparse.csr_matrix(rng.poisson(1, size=(50, 30)).astype(np.float32))
+    source = ad.AnnData(
+        X=matrix,
+        var=pd.DataFrame(index=[f"g{i}" for i in range(30)]),
+    )
+    source.obsm["X_umap"] = rng.normal(size=(50, 2))
+    source.write_h5ad(source_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "vec_slim.cli",
+            str(source_path),
+            str(output_path),
+            "--task",
+            "T1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+
+    slim = ad.read_h5ad(output_path)
+    assert sparse.issparse(slim.X)
+    assert slim.X.dtype == np.float32
+    assert len(slim.obsm) == 0
+
+
+def test_cli_refuses_in_place_overwrite(tmp_path):
+    source_path = tmp_path / "source.h5ad"
+    ad.AnnData(X=np.ones((10, 4), dtype=np.float32)).write_h5ad(source_path)
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "vec_slim.cli",
+            str(source_path),
+            str(source_path),
+            "--task",
+            "T1",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 2
+    assert "different files" in result.stdout
