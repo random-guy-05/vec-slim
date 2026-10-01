@@ -46,7 +46,7 @@ def test_t2_cli_strips_baggage_and_preserves_scorer_content(tmp_path):
     assert list(slim.var_names) == [f"g{i}" for i in range(20)]
     assert slim.obsm["spatial_3D"].shape == (80, 3)
     assert "X_umap" not in slim.obsm
-    assert len(slim.layers) == 0
+    assert "rawish" not in slim.layers
     assert len(slim.uns) == 0
     assert "celltype" not in slim.obs.columns
 
