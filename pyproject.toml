@@ -13,12 +13,12 @@ dependencies = [
   "numpy>=1.24",
   "anndata>=0.10",
   "scipy>=1.10",
-  "pandas>=2.0"
+  "pandas>=2.0",
 ]
 keywords = ["virtual-embryo", "h5ad", "anndata", "compression"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "ruff>=0.6"]
 
 [project.scripts]
 vec-slim = "vec_slim.cli:main"
@@ -29,3 +29,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 100
