@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import os
+import tempfile
 from contextlib import suppress
 from pathlib import Path
 
@@ -20,7 +22,9 @@ def main(argv: list[str] | None = None) -> int:
 
     import anndata as ad
 
-    if args.input.resolve() == args.output.resolve():
+    if args.input.resolve() == args.output.resolve() or (
+        args.output.exists() and args.input.samefile(args.output)
+    ):
         print("ERROR: input and output must be different files")
         return 2
 
@@ -58,27 +62,37 @@ def main(argv: list[str] | None = None) -> int:
         )[:, :3]
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_h5ad(args.output, compression="gzip")
-
-    check = ad.read_h5ad(args.output, backed="r")
+    with tempfile.NamedTemporaryFile(
+        prefix=f".{args.output.name}.",
+        suffix=".h5ad",
+        dir=args.output.parent,
+        delete=False,
+    ) as candidate_file:
+        candidate = Path(candidate_file.name)
     try:
-        after_spatial = (
-            check.obsm["spatial_3D"] if plan.keep_spatial else None
-        )
-        after_fingerprint = semantic_fingerprint(
-            check.X,
-            check.var_names,
-            args.task,
-            after_spatial,
-        )
-    finally:
-        with suppress(AttributeError, OSError, ValueError):
-            check.file.close()
+        output.write_h5ad(candidate, compression="gzip")
+        check = ad.read_h5ad(candidate, backed="r")
+        try:
+            after_spatial = (
+                check.obsm["spatial_3D"] if plan.keep_spatial else None
+            )
+            after_fingerprint = semantic_fingerprint(
+                check.X,
+                check.var_names,
+                args.task,
+                after_spatial,
+            )
+        finally:
+            with suppress(AttributeError, OSError, ValueError):
+                check.file.close()
 
-    if before_fingerprint != after_fingerprint:
-        args.output.unlink(missing_ok=True)
-        print("ERROR: scorer-semantic fingerprint changed; output removed")
-        return 2
+        if before_fingerprint != after_fingerprint:
+            print("ERROR: scorer-semantic fingerprint changed; output unchanged")
+            return 2
+
+        os.replace(candidate, args.output)
+    finally:
+        candidate.unlink(missing_ok=True)
 
     before_bytes = args.input.stat().st_size
     after_bytes = args.output.stat().st_size

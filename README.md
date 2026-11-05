@@ -30,6 +30,7 @@ The Challenge caps a prediction file at 1200 MB, and Task 1 can be especially la
 
 ## Safety notes
 
-- Input and output must be different files; the CLI refuses to overwrite the source in place.
+- Input and output must be different files; the CLI rejects paths, symlinks, and hardlinks that refer to the source.
+- The CLI writes and verifies a temporary H5AD in the output directory before replacing the destination atomically. A failed write or fingerprint check leaves an existing destination unchanged.
 - The semantic fingerprint checks scorer-visible expression, ordered gene names, and the first three spatial columns for T2/T3 after float32 casting.
 - Slimming does not prove that a prediction is valid for a particular board. Run the normal VEC validator afterward.
